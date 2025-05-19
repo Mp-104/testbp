@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1030464807041",
+    "project_id": "new-backpack",
+    "storage_bucket": "new-backpack.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1030464807041:android:ca9690217ded349c65ed80",
+        "android_client_info": {
+          "package_name": "com.anonymous.newbackpac"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXfN-1Al-Qg9Se8GnSpPT9cxpXStoXtxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
