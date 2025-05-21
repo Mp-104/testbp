@@ -24,7 +24,7 @@ const WipAlert = () => {
   const [feelEmotionData, setFeelEmotionData] = useState<Record<string, string>>({});     
   const route = useRoute();
   const {source} = route.params ?? {};
-  const { energy, setEnergy, remainingGametime } = useUsageStats();
+  const { energy, setEnergy, remainingGametime, allotedGametime } = useUsageStats();
 
     let backgroundImage;
     let message;
@@ -102,6 +102,7 @@ const WipAlert = () => {
           <View style={styles.bubbleTextContainer}>
             <Text style={styles.bubbleText}>{message}</Text>
             <Text style={styles.gameTimeGreen}>{remainingGametime}</Text>
+            <Text style={styles.gameTimeGreen}>{allotedGametime}</Text>
           </View>
         </View>
       </ImageBackground>

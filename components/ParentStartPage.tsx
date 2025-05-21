@@ -31,7 +31,7 @@ const ParentStartPage = () => {
           <TouchableOpacity style={styles.menuItem}>
             <Text style={styles.menuText}>📖 Study Time</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("GametimeScreen")}>
             <Text style={styles.menuText}>🎮 Game Time</Text>
           </TouchableOpacity>
 

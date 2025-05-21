@@ -2,6 +2,9 @@ import { queryUsageStats } from '@brighthustle/react-native-usage-stats-manager'
 import React, {createContext, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
 import UsageStats from 'react-native-usage-stats';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { doc, getDoc, collection, getDocs, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
+
+import { auth, db } from './firbaseConfig';
 
 interface UsageStatsContextProps {
     usageStats: any;
@@ -10,6 +13,7 @@ interface UsageStatsContextProps {
     setEnergy: SetStateAction<any>;
     remainingGametime: any;
     setRemainingGametime: SetStateAction<any>;
+    allotedGametime: number;
 };
 
 const UsageStatsContext = createContext<UsageStatsContextProps | undefined>(undefined);
@@ -18,6 +22,7 @@ export const UsageStatsProvider = ( {children} ) => {
     const [usageStats, setUsageStats] = useState<any>("");
     const [energy, setEnergy] = useState<any>(100);
     const [remainingGametime, setRemainingGametime] = useState(1000);
+    const [allotedGametime, setAllotedGametime] = useState<number>(25200);
 
     const [newStat, setNewStat] = useState(); // may be removed, is not
     const [prevStat, setPrevStat] = useState();
@@ -46,11 +51,35 @@ export const UsageStatsProvider = ( {children} ) => {
         return weekNo;
     }
 
+    const currentUser = auth.currentUser
+
+    const userId = currentUser?.uid
+
     useEffect(() => {
         let prevStatLocal: number | undefined;
         let lastCheckedDay = new Date().getDate();
 
         const interval = setInterval(async () => {
+            
+            //const docRef = doc(db, "children", parentId, "calendar", date);
+            try {
+                const docRef2 = doc(db, "children", userId);
+                //const docSnap = await getDoc(docRef);
+                const docSnap2 = await getDoc(docRef2);
+                
+                if(docSnap2.exists()) {
+                    const data = docSnap2.data();
+                    data.gameTime;
+                    //console.log("data.gameTime: ", data.gameTime);
+                    setAllotedGametime(data.gameTime);
+                }
+                
+                //console.log("context, docSnap2: ", docSnap2.data())
+            } catch (error) {
+                console.log("fel med att hämta data: ", error);
+                
+            }
+            
 
             const currentWeek = getWeek();
             //const currentIsoWeek = getIsoWeek();
@@ -61,7 +90,7 @@ export const UsageStatsProvider = ( {children} ) => {
             const currentGametime = storedGametime ? Number(storedGametime) : 1000;
 
             if (currentWeek !== lastWeek) {
-                const newGametime = currentGametime + 1000;
+                const newGametime = currentGametime + (allotedGametime ?? 25200); // 25200 is 7 hours
                 setRemainingGametime(newGametime)
                 await AsyncStorage.setItem("gameTime", newGametime.toString());
                 await AsyncStorage.setItem("week", currentWeek.toString());
@@ -166,10 +195,10 @@ export const UsageStatsProvider = ( {children} ) => {
 
         return ()=> clearInterval(interval); // without the clearInterval, prevStat and newStat will fluctuate
 
-    }, [prevStat, remainingGametime]);
+    }, [prevStat, remainingGametime, userId]);
 
     return (
-        <UsageStatsContext.Provider value={{usageStats, setUsageStats, energy, setEnergy, remainingGametime, setRemainingGametime}}>
+        <UsageStatsContext.Provider value={{usageStats, setUsageStats, energy, setEnergy, remainingGametime, setRemainingGametime, allotedGametime}}>
             {children}
         </UsageStatsContext.Provider>
     )

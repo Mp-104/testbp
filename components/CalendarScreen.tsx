@@ -134,8 +134,11 @@ const CalendarScreen: React.FC<CalendarViewProps> = ({
     try {
       console.log("parentId", parentId)
       const docRef = doc(db, "children", parentId, "calendar", date);
+      const docRef2 = doc(db, "children", parentId);
       const docSnap = await getDoc(docRef);
+      const docSnap2 = await getDoc(docRef2)
 
+      console.log("docSnap2.data(): ", docSnap2.data());
       console.log("docSnap: ", docSnap)
       console.log("docSnap.exists(): ", docSnap.exists())
       console.log("docSnap.data(): ", docSnap.data())
