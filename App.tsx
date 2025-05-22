@@ -66,6 +66,8 @@ import WipAlert from './components/WipAlert';
 import GameTimer from './components/GameTimer';
 import GametimeScreen from './components/GametimeScreen';
 import WeekDetailScreen from './components/WeekDetailScreen';
+import AppPermissionsScreen from './components/AppPermissionScreen';
+import useUnacceptedApps from './components/useUnnacceptedApps';
 
 /* PushNotification.configure({
   onNotification: function (notification) {
@@ -160,6 +162,12 @@ PushNotification.configure({
 export default function App() {
   const [sent, setSent] = useState(false);
   const [prevStat, setPrevStat] = useState(0);
+
+  const { unacceptedApps, toggleAppStatus } = useUnacceptedApps();
+
+  useEffect(() => {
+    console.log("Unaccepted Apps on app start:", unacceptedApps);
+  }, [unacceptedApps, toggleAppStatus]);
 
   useEffect(()=> {
     backgroundTask();
@@ -560,6 +568,7 @@ export default function App() {
               <Stack.Screen name="GameTimer" component={GameTimer} />
               <Stack.Screen name="GametimeScreen" component={GametimeScreen} />
               <Stack.Screen name="WeekDetails" component={WeekDetailScreen} />
+              <Stack.Screen name="Permissions" component={AppPermissionsScreen} />
 
 
               <Stack.Screen name="Balloon" component={BalloonGame} />

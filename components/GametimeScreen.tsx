@@ -5,6 +5,7 @@ import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "./firbaseConfig";
 import { TextInput } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
+import useUnacceptedApps from "./useUnnacceptedApps";
 
 
 
@@ -15,6 +16,7 @@ const GametimeScreen = () => {
 
     const [weeks, setWeeks] = useState([]);
     const [selectedWeekData, setSelectedWeekData] = useState(null);
+    const [screenTime, setScreenTime] = useState();
     
     const navigation = useNavigation();
 
@@ -28,6 +30,8 @@ const GametimeScreen = () => {
         });
         return () => unsubscribe();
     }, []);
+    
+    console.log("UA: ", useUnacceptedApps().unacceptedApps)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,6 +56,7 @@ const GametimeScreen = () => {
                     data: doc.data(),
                 }))
                 setWeeks(weekList)
+                //console.log("weekList: ", weekList[0].data)
             } catch (error) {
                 console.log("fel med att hämta data: ", error);
 
@@ -124,20 +129,20 @@ const GametimeScreen = () => {
 
             <Text style={styles.result}>{seconds}</Text>
 
-            <TouchableOpacity style={styles.saveButton} onPress={fetchScreentimeData}>
-                <Text style={styles.buttonText}>Hämta screentime</Text>
+            <TouchableOpacity style={styles.saveButton} onPress={() => navigation.navigate("Permissions", {childId: userId, screenTime: weeks[0].data })}>
+                <Text style={styles.buttonText}>App permissions</Text>
             </TouchableOpacity>
 
             <ScrollView>
                 <Text>Weeks</Text>
 
                 {weeks.map((week) => (
-                    <View key={week.id}>
+                    <ScrollView key={week.id}>
                         <TouchableOpacity style={styles.saveButton} onPress={() => navigation.navigate("WeekDetails", {weekId: week.id, weekData: week.data})}>
                             <Text style={styles.buttonText}>{week.id}</Text>
                         </TouchableOpacity>
 
-                    </View>
+                    </ScrollView>
                 ))}
 
                 {selectedWeekData && (

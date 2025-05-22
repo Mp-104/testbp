@@ -2,7 +2,7 @@ import { queryUsageStats } from '@brighthustle/react-native-usage-stats-manager'
 import React, {createContext, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
 import UsageStats from 'react-native-usage-stats';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { doc, getDoc, collection, getDocs, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, updateDoc, arrayUnion, setDoc, writeBatch } from 'firebase/firestore';
 
 import { auth, db } from './firbaseConfig';
 
@@ -17,6 +17,29 @@ interface UsageStatsContextProps {
 };
 
 const UsageStatsContext = createContext<UsageStatsContextProps | undefined>(undefined);
+
+const syncNewApps = async (childId, screenTime) => {
+    const permissionsRef = collection(db, "children", childId, "appPermissions");
+    const permissionsSnap = await getDocs(permissionsRef);
+    const existingApps = new Set();
+    permissionsSnap.forEach(doc => existingApps.add(doc.id));
+  
+    const batch = writeBatch(db);
+  
+    Object.entries(screenTime).forEach(([pkg, info]) => {
+      if (!existingApps.has(pkg)) {
+        const docRef = doc(db, "children", childId, "appPermissions", pkg);
+        batch.set(docRef, {
+          appName: info.appName,
+          packageName: pkg,
+          status: "unreviewed"
+        });
+      }
+    });
+  
+    await batch.commit();
+  };
+  
 
 export const UsageStatsProvider = ( {children} ) => {
     const [usageStats, setUsageStats] = useState<any>("");
@@ -40,7 +63,7 @@ export const UsageStatsProvider = ( {children} ) => {
     } */
 
     const getWeek = () => {
-        const date = new Date();
+        const date = new Date(2025, 6, 26);
 
         const day = date.getDay();
         const diff = date.getDate() + 4 - (day === 0 ? 7: day);
@@ -98,7 +121,8 @@ export const UsageStatsProvider = ( {children} ) => {
                 
                 try {
                     const docRef = doc(db, "children", userId, "weeks", week);
-                    await setDoc(docRef, {screenTime: screenTimeOfLastWeek})
+                    await setDoc(docRef, {screenTime: screenTimeOfLastWeek});
+                    await syncNewApps(userId, screenTimeOfLastWeek);
                 } catch (error) {
                     console.log("Error setting weekly screen time: ", error)
                 }
