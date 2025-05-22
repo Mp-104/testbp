@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react"
-import { Alert, Text, View, StyleSheet, Touchable, TouchableOpacity } from "react-native"
+import { Alert, Text, View, StyleSheet, Touchable, TouchableOpacity, ScrollView } from "react-native"
 import { getUserId } from "./firebaseServices";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "./firbaseConfig";
 import { TextInput } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
 
 
 
@@ -11,6 +12,11 @@ const GametimeScreen = () => {
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState<string>();
     const [seconds, setSeconds] = useState<number | undefined>(undefined)
+
+    const [weeks, setWeeks] = useState([]);
+    const [selectedWeekData, setSelectedWeekData] = useState(null);
+    
+    const navigation = useNavigation();
 
     useEffect(() => {
         const unsubscribe = getUserId((id) => {
@@ -38,6 +44,14 @@ const GametimeScreen = () => {
                 }
 
                 console.log("context, docSnap2: ", docSnap2.data())
+                const collectionRef = collection(db, "children", userId, "weeks");
+                const collectionSnap = await getDocs(collectionRef)
+
+                const weekList = collectionSnap.docs.map((doc) => ({
+                    id: doc.id,
+                    data: doc.data(),
+                }))
+                setWeeks(weekList)
             } catch (error) {
                 console.log("fel med att hämta data: ", error);
 
@@ -69,6 +83,27 @@ const GametimeScreen = () => {
         }
     }
 
+    const fetchScreentimeData = async () => {
+        console.log("fetchScreenTimeData?")
+        
+
+
+
+        try {
+            const collectionRef = collection(db, "children", userId, "weeks");
+            const collectionSnap = await getDocs(collectionRef)
+            //console.log("docsnap exists? ", docSnap.exists())
+            collectionSnap.forEach((doc) => {
+                console.log(doc.id, " => ", doc.data());
+            })
+            
+                //console.log("Saved screen time usage: ", docSnap);
+            
+        } catch (error) {
+            console.log("Error fetching screen time: ", error);
+        }
+    }
+
     return (
         <View style={styles.container}>
             <Text>Gametime Screen</Text>
@@ -83,11 +118,35 @@ const GametimeScreen = () => {
 
 
 
-            <TouchableOpacity style={styles.saveButton} onPress={saveGametime}>
+            <TouchableOpacity style={styles.saveButton} onPressIn={saveGametime}>
                 <Text style={styles.buttonText}>Bekräfta speltid</Text>
             </TouchableOpacity>
 
             <Text style={styles.result}>{seconds}</Text>
+
+            <TouchableOpacity style={styles.saveButton} onPress={fetchScreentimeData}>
+                <Text style={styles.buttonText}>Hämta screentime</Text>
+            </TouchableOpacity>
+
+            <ScrollView>
+                <Text>Weeks</Text>
+
+                {weeks.map((week) => (
+                    <View key={week.id}>
+                        <TouchableOpacity style={styles.saveButton} onPress={() => navigation.navigate("WeekDetails", {weekId: week.id, weekData: week.data})}>
+                            <Text style={styles.buttonText}>{week.id}</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                ))}
+
+                {selectedWeekData && (
+                    <View>
+                        <Text>Selected week data: {}</Text>
+                        <Text>{JSON.stringify(selectedWeekData, null, 2)}</Text>
+                    </View>
+                )}
+            </ScrollView>
 
         </View>
     )

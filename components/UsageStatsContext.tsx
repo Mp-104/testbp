@@ -76,7 +76,7 @@ export const UsageStatsProvider = ( {children} ) => {
                 
                 //console.log("context, docSnap2: ", docSnap2.data())
             } catch (error) {
-                console.log("fel med att hämta data: ", error);
+                console.log("Gick inte att hämta data från Firestore is UsageStatsContext: ", error);
                 
             }
             
@@ -94,8 +94,17 @@ export const UsageStatsProvider = ( {children} ) => {
                 setRemainingGametime(newGametime)
                 await AsyncStorage.setItem("gameTime", newGametime.toString());
                 await AsyncStorage.setItem("week", currentWeek.toString());
+                const screenTimeOfLastWeek = await queryUsageStats(1, new Date().getTime() - 7 * 24 * 60 * 60 * 1000, new Date().getTime());
+                
+                try {
+                    const docRef = doc(db, "children", userId, "weeks", week);
+                    await setDoc(docRef, {screenTime: screenTimeOfLastWeek})
+                } catch (error) {
+                    console.log("Error setting weekly screen time: ", error)
+                }
+                
             }
-            console.log("Current week: ", currentWeek)
+            //console.log("Current week: ", currentWeek)
             //console.log("Current ISO week: ", currentIsoWeek)
 
             //console.log("usageStatsContext", remainingGametime)
@@ -185,8 +194,8 @@ export const UsageStatsProvider = ( {children} ) => {
             setRemainingGametime(prev => prev - sessionTime)
             setPrevTime(totalTime);
             await AsyncStorage.setItem("gameTime", remainingGametime.toString());
-            console.log("totalTime", totalTime);
-            console.log("remainingGametime: ", remainingGametime)
+            //console.log("totalTime", totalTime);
+            //console.log("remainingGametime: ", remainingGametime)
 
             
             

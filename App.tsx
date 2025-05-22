@@ -65,6 +65,7 @@ import UsageTrackerComponent from './components/UsageTrackerComponent';
 import WipAlert from './components/WipAlert';
 import GameTimer from './components/GameTimer';
 import GametimeScreen from './components/GametimeScreen';
+import WeekDetailScreen from './components/WeekDetailScreen';
 
 /* PushNotification.configure({
   onNotification: function (notification) {
@@ -558,6 +559,7 @@ export default function App() {
               <Stack.Screen name="WipAlert" component={WipAlert} options={{ header: ()=> null}} />
               <Stack.Screen name="GameTimer" component={GameTimer} />
               <Stack.Screen name="GametimeScreen" component={GametimeScreen} />
+              <Stack.Screen name="WeekDetails" component={WeekDetailScreen} />
 
 
               <Stack.Screen name="Balloon" component={BalloonGame} />

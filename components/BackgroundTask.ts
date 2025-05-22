@@ -25,7 +25,7 @@ export const backgroundTask = () => {
     
     
         const checkAppUsage = async () => {
-          console.log("process started")
+          //console.log("process started")
           const currentDate = new Date();
           const currentTime = currentDate.getTime();
           const startOfDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
@@ -42,16 +42,16 @@ export const backgroundTask = () => {
           const AmongUs = Object.values(result3).filter(item => item.appName === "Among Us").reduce((sum, item) => sum + item.totalTimeInForeground, 0);
     
           const MyBoy = Object.values(result3).filter(item => item.appName === "My Boy! Free").reduce((sum, item) => sum + item.totalTimeInForeground, 0);
-            console.log("MyBoy", MyBoy)
+          //console.log("MyBoy", MyBoy)
           let gameTime = 0;
           const prevStat = await AsyncStorage.getItem("prevStat")
     
-          console.log("prevStat: ", prevStat)
+          //console.log("prevStat: ", prevStat)
           const playDifference = MyBoy - prevStat;
     
-          console.log("gameTime1: ", gameTime)
+          //console.log("gameTime1: ", gameTime)
 
-          console.log("---------UsageEvents--------")
+          //console.log("---------UsageEvents--------")
           const events = await OverlayModule.getRecentUsageEvents();
           //console.log("allEvents: ", events);
           /* console.log("events: ", events[0]["packageName"], "Timestamp: ", events[0]["timestamp"]);
@@ -74,11 +74,11 @@ export const backgroundTask = () => {
             .filter(event => socialTargetPackages.includes(event.packageName))
             .map(event => event.eventType);
 
-          console.log("matchingTimeStampes[..length -1]: ",matchingTimestamps[matchingTimestamps.length - 1]);
+          //console.log("matchingTimeStampes[..length -1]: ",matchingTimestamps[matchingTimestamps.length - 1]);
 
           const appActive = matchingTimestamps[matchingTimestamps.length - 1];
 
-          console.log("appActive: ", appActive);
+          //console.log("appActive: ", appActive);
 
           const filteredGamePackages = events.filter(event => gameTargetPackages.includes(event.packageName)).map(event => event.eventType);
           
@@ -137,7 +137,7 @@ export const backgroundTask = () => {
             seconds += 6
           }
 
-          console.log("seconds: ", seconds);
+          //console.log("seconds: ", seconds);
 
           //const event = OverlayModule.getForegroundApp();
           /* const LoopHandler = await OverlayModule.startTrackingUsage( (currentApp: string, timeSpent: number) => {
@@ -152,9 +152,9 @@ export const backgroundTask = () => {
         }) */
           //console.log("LoopHandler: ", LoopHandler)
           //console.log("RootEvent: ", event);
-          console.log("---------/UsageEvents--------")
+          //console.log("---------/UsageEvents--------")
 
-          console.log("gameActive: ", gameActive )
+          //console.log("gameActive: ", gameActive )
           if (gameActive === 1) {
             OverlayModule.launchApp();
             navigate("WipAlert", { source: "HomeworkTimer" });
@@ -261,9 +261,9 @@ export const backgroundTask = () => {
     
           //console.log("myBoy: ", MyBoy)
           const badAppsTotalTimeInForeground = YT + Instagram + TikTok + Snapchat + Triller + Roblox + Fortnite + AmongUs;
-          console.log("backgroundApp: ", badAppsTotalTimeInForeground)
+          //console.log("backgroundApp: ", badAppsTotalTimeInForeground)
           const sent = true;
-          console.log("sent: ", sent);
+          //console.log("sent: ", sent);
           const remainingGametime = await AsyncStorage.getItem("gameTime");
          // console.log("GameTime: ", remainingGametime)
           if (badAppsTotalTimeInForeground > 360 && !sent) { // Notify if > 1 hour
