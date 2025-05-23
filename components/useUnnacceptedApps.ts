@@ -44,12 +44,37 @@ const useUnacceptedApps = () => {
           //if (stored) setUnacceptedApps(JSON.parse(stored));
         }
       } catch (error) {
-        console.error("Error loading unaccepted apps:", error);
+        console.log("Error loading unaccepted apps:", error);
       }
     };
 
     loadUnacceptedApps();
   }, [childId]);
+
+  const loadUnacceptedApps = async () => {
+    try {
+      const ref = collection(db, "children", childId, "appPermissions");
+      const snap = await getDocs(ref);
+      const firestoreUnacceptedApps = [];
+
+      snap.forEach((doc) => {
+        const { packageName, status } = doc.data();
+        if (status === "unaccepted") {
+          firestoreUnacceptedApps.push(packageName);
+        }
+      });
+
+      if (firestoreUnacceptedApps.length > -1) {
+        setUnacceptedApps(firestoreUnacceptedApps);
+        await AsyncStorage.setItem("unacceptedApps", JSON.stringify(firestoreUnacceptedApps));
+      } else {
+        //const stored = await AsyncStorage.getItem("unacceptedApps");
+        //if (stored) setUnacceptedApps(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.log("Error loading unaccepted apps:", error);
+    }
+  };
 
   const toggleAppStatus = async (appName, status) => {
     if (!childId) return;
@@ -77,12 +102,12 @@ const useUnacceptedApps = () => {
       await AsyncStorage.setItem("unacceptedApps", JSON.stringify(updatedUnacceptedApps));
       setUnacceptedApps(updatedUnacceptedApps);
     } catch (error) {
-      console.error("Error updating app status:", error);
+      console.log("Error updating app status:", error);
     }
   };
   
 
-  return { unacceptedApps, toggleAppStatus };
+  return { unacceptedApps, toggleAppStatus, loadUnacceptedApps };
 };
 
 export default useUnacceptedApps;

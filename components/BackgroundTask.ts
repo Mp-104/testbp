@@ -71,36 +71,23 @@ export const backgroundTask = () => {
     const socialTargetPackages = ["com.google.android.youtube", "com.fastemulator.gbafree"]; // insert unwanted apps
     const gameTargetPackages = ["com.fastemulator.gbafree"];
 
-    const currentUser = auth.currentUser
-
-    const childId = currentUser?.uid;
-    let firestoreUnacceptedApps = [];
-    try {
-      const ref = collection(db, "children", childId, "appPermissions");
-      const snap = await getDocs(ref);
-      
-
-      snap.forEach(async (doc) => {
-        const { packageName, status } = doc.data();
-        if (status === "unaccepted") {
-          firestoreUnacceptedApps.push(packageName);
-        }
-        await AsyncStorage.setItem("badApps", JSON.stringify(firestoreUnacceptedApps));
-      });
-    } catch (error) {
-      console.log("Gick inte hämta data i BackgroundTask: ", error);
-      firestoreUnacceptedApps = await AsyncStorage.getItem("badApps");
+    let unacceptedApps;
+    if (await AsyncStorage.getItem("unacceptedApps") != null) {
+      unacceptedApps = await AsyncStorage.getItem("unacceptedApps");
+    } else {
+      unacceptedApps = gameTargetPackages;
     }
+    
 
-    const unacceptedApps = await AsyncStorage.getItem("unacceptedApps");
+    
 
 
-   /*  console.log("badApps0: ", await AsyncStorage.getItem("badApps"))
+    //console.log("badApps0: ", await AsyncStorage.getItem("badApps"))
     console.log("unaccpetedAps: ", unacceptedApps)
-    console.log("badApps: ", firestoreUnacceptedApps) */
+    /**/
 
     const matchingTimestamps = events
-      .filter(event => firestoreUnacceptedApps.includes(event.packageName))
+      .filter(event => unacceptedApps?.includes(event.packageName))
       //.filter(event => socialTargetPackages.includes(event.packageName))
       .map(event => event.eventType);
 
@@ -148,9 +135,21 @@ export const backgroundTask = () => {
         seconds = -60 // set to -3600, an hour delay, move after try catch
         navigate("Stats");
 
+        try {
+          const timestamp = Timestamp.now();
+
+          const storedWarnings = await AsyncStorage.getItem("warnings");
+          const warnings = storedWarnings ? JSON.parse(storedWarnings) : []
+
+          warnings.push(timestamp);
+          await AsyncStorage.setItem("warnings", JSON.stringify(warnings));
+        } catch (error) {
+          console.log("kunde inte logga varning för speltid: ", error);
+        }
+
 
         // Log behaviour
-        try {
+        /* try {
           await addDoc(collection(db, "warning"), {
             timestamp: Timestamp.now(),
             duration: seconds
@@ -158,7 +157,7 @@ export const backgroundTask = () => {
 
         } catch (error) {
           console.error("Kunde inte logga övertid app användning: ", error)
-        }
+        } */
 
       }
     }

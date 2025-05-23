@@ -5,6 +5,7 @@ import { Button, Snackbar } from "react-native-paper";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "./Firebase";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SignUp = () => {
     const [email, setEmail] = useState<string>('');
@@ -24,7 +25,10 @@ const SignUp = () => {
                 Alert.alert('Registrering lyckades', `Välkommen, ${email}!`);
                 setShowSuccessMessage(true);  
                 sendEmailVerification(user.user);
+                await AsyncStorage.setItem("email", email);
+                await AsyncStorage.setItem("password", password);
                 navigation.navigate("Loading");
+                
                 console.log("User registered successfully");
 
             } else if (password !== password2) {

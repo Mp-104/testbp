@@ -68,6 +68,11 @@ import GametimeScreen from './components/GametimeScreen';
 import WeekDetailScreen from './components/WeekDetailScreen';
 import AppPermissionsScreen from './components/AppPermissionScreen';
 import useUnacceptedApps from './components/useUnnacceptedApps';
+import Warnings from './components/Warnings';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from './components/firbaseConfig';
+import { auth } from './components/Firebase';
+import { autoLogin } from './components/autoLogin';
 
 /* PushNotification.configure({
   onNotification: function (notification) {
@@ -163,11 +168,13 @@ export default function App() {
   const [sent, setSent] = useState(false);
   const [prevStat, setPrevStat] = useState(0);
 
-  const { unacceptedApps, toggleAppStatus } = useUnacceptedApps();
+  const { unacceptedApps, toggleAppStatus, loadUnacceptedApps } = useUnacceptedApps();
 
   useEffect(() => {
     console.log("Unaccepted Apps on app start:", unacceptedApps);
-  }, [unacceptedApps, toggleAppStatus]);
+    autoLogin();
+    loadUnacceptedApps()
+  }, []);
 
   useEffect(()=> {
     backgroundTask();
@@ -268,7 +275,22 @@ export default function App() {
 
   const performBackground = async () => {
     console.log("running background task");
-    
+
+    loadUnacceptedApps();
+    console.log("loaded unacceptableApps")
+
+    try {
+      const storedWarnings = await AsyncStorage.getItem("warnings");
+      const warnings = storedWarnings ? JSON.parse(storedWarnings) : [];
+
+      const currentUser = auth.currentUser;
+      const userId = currentUser?.uid;
+
+      const docRef = doc(db, "warnings", userId);
+      await setDoc(docRef, { timestamps: warnings }, { merge: true });
+    } catch (error) {
+      
+    }
 
     const currentDate = new Date();
     const currentTime = currentDate.getTime();
@@ -569,6 +591,7 @@ export default function App() {
               <Stack.Screen name="GametimeScreen" component={GametimeScreen} />
               <Stack.Screen name="WeekDetails" component={WeekDetailScreen} />
               <Stack.Screen name="Permissions" component={AppPermissionsScreen} />
+              <Stack.Screen name="Warnings" component={Warnings} />
 
 
               <Stack.Screen name="Balloon" component={BalloonGame} />

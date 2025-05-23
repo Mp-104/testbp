@@ -6,6 +6,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { auth } from "./Firebase";
+import useUnacceptedApps from "./useUnnacceptedApps";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define navigation stack types
 type RootStackParamList = {
@@ -22,6 +24,9 @@ const Login = () => {
   const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
 
+    const { unacceptedApps, toggleAppStatus, loadUnacceptedApps } = useUnacceptedApps();
+  
+
   const handleLogin = async () => {
     setLoading(true);
     setShowErrorMessage(false);
@@ -29,10 +34,12 @@ const Login = () => {
   
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      await AsyncStorage.setItem("email", email);
+      await AsyncStorage.setItem("password", password);
       Alert.alert("Inloggning lyckades", `Välkommen tillbaka, ${email}!`);
       setShowSuccessMessage(true);
       console.log("User logged in successfully");
-  
+      loadUnacceptedApps();
       // Navigate to ParentPage after login
       navigation.navigate("ParentPage");
   

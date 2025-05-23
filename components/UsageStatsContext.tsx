@@ -14,6 +14,7 @@ interface UsageStatsContextProps {
     remainingGametime: any;
     setRemainingGametime: SetStateAction<any>;
     allotedGametime: number;
+    resetTime: boolean;
 };
 
 const UsageStatsContext = createContext<UsageStatsContextProps | undefined>(undefined);
@@ -46,6 +47,7 @@ export const UsageStatsProvider = ( {children} ) => {
     const [energy, setEnergy] = useState<any>(100);
     const [remainingGametime, setRemainingGametime] = useState(1000);
     const [allotedGametime, setAllotedGametime] = useState<number>(25200);
+    const [resetTime, setResetTime] = useState(false);
 
     const [newStat, setNewStat] = useState(); // may be removed, is not
     const [prevStat, setPrevStat] = useState();
@@ -63,7 +65,7 @@ export const UsageStatsProvider = ( {children} ) => {
     } */
 
     const getWeek = () => {
-        const date = new Date(2025, 6, 26);
+        const date = new Date(2025, 10, 30);
 
         const day = date.getDay();
         const diff = date.getDate() + 4 - (day === 0 ? 7: day);
@@ -84,6 +86,7 @@ export const UsageStatsProvider = ( {children} ) => {
 
         const interval = setInterval(async () => {
             
+            console.log("resetTime: ", resetTime)
             //const docRef = doc(db, "children", parentId, "calendar", date);
             try {
                 const docRef2 = doc(db, "children", userId);
@@ -95,6 +98,7 @@ export const UsageStatsProvider = ( {children} ) => {
                     data.gameTime;
                     //console.log("data.gameTime: ", data.gameTime);
                     setAllotedGametime(data.gameTime);
+                    setResetTime(data.resetTime);
                 }
                 
                 //console.log("context, docSnap2: ", docSnap2.data())
@@ -113,7 +117,13 @@ export const UsageStatsProvider = ( {children} ) => {
             const currentGametime = storedGametime ? Number(storedGametime) : 1000;
 
             if (currentWeek !== lastWeek) {
-                const newGametime = currentGametime + (allotedGametime ?? 25200); // 25200 is 7 hours
+                let newGametime = 0;
+                if (resetTime == true) {
+                    newGametime = allotedGametime ?? 25200;
+                } else {
+                    newGametime = currentGametime + (allotedGametime ?? 25200); // 25200 is 7 hours
+                }
+                
                 setRemainingGametime(newGametime)
                 await AsyncStorage.setItem("gameTime", newGametime.toString());
                 await AsyncStorage.setItem("week", currentWeek.toString());
@@ -121,7 +131,7 @@ export const UsageStatsProvider = ( {children} ) => {
                 
                 try {
                     const docRef = doc(db, "children", userId, "weeks", week);
-                    await setDoc(docRef, {screenTime: screenTimeOfLastWeek});
+                    await setDoc(docRef, {screenTime: screenTimeOfLastWeek, remainingGametime: remainingGametime});
                     await syncNewApps(userId, screenTimeOfLastWeek);
                 } catch (error) {
                     console.log("Error setting weekly screen time: ", error)
@@ -228,10 +238,10 @@ export const UsageStatsProvider = ( {children} ) => {
 
         return ()=> clearInterval(interval); // without the clearInterval, prevStat and newStat will fluctuate
 
-    }, [prevStat, remainingGametime, userId]);
+    }, [prevStat, remainingGametime, userId, resetTime]);
 
     return (
-        <UsageStatsContext.Provider value={{usageStats, setUsageStats, energy, setEnergy, remainingGametime, setRemainingGametime, allotedGametime}}>
+        <UsageStatsContext.Provider value={{usageStats, setUsageStats, energy, setEnergy, remainingGametime, setRemainingGametime, allotedGametime, resetTime}}>
             {children}
         </UsageStatsContext.Provider>
     )

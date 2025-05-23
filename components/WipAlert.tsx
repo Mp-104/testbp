@@ -24,7 +24,7 @@ const WipAlert = () => {
   const [feelEmotionData, setFeelEmotionData] = useState<Record<string, string>>({});     
   const route = useRoute();
   const {source} = route.params ?? {};
-  const { energy, setEnergy, remainingGametime, allotedGametime } = useUsageStats();
+  const { energy, setEnergy, remainingGametime, allotedGametime, resetTime } = useUsageStats();
 
     let backgroundImage;
     let message;

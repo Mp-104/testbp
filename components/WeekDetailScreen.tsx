@@ -21,6 +21,7 @@ const WeekDetailScreen = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Week: {weekId}</Text>
+      <Text style={styles.subtitle}>Remaining gametime week: {weekData.remainingGametime}</Text>
       <Text style={styles.subtitle}>App Usage:</Text>
 
       <FlatList
