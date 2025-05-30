@@ -28,7 +28,6 @@
     "date-fns": "^4.1.0",
     "expo": "~52.0.30",
     "expo-av": "^15.0.2",
-    "expo-dev-client": "~5.0.12",
     "expo-gl": "^15.0.4",
     "expo-linear-gradient": "~14.0.2",
     "expo-status-bar": "~2.0.1",

@@ -86,7 +86,7 @@ export const UsageStatsProvider = ( {children} ) => {
 
         const interval = setInterval(async () => {
             
-            console.log("resetTime: ", resetTime)
+            //console.log("resetTime: ", resetTime)
             //const docRef = doc(db, "children", parentId, "calendar", date);
             try {
                 const docRef2 = doc(db, "children", userId);
